@@ -103,7 +103,7 @@
 	    
 	    <snapshotRepository>
 	      <id>nexus</id>
-	      <name>Mithun Technologies Snapshot Nexus Repository </name>
+	      <name>Mithun Technologies Snapshot Nexus Repository</name>
 	      <url>http://13.235.24.201:7272/devopstraining/repository/walmart-snapshot/</url>
 	    </snapshotRepository>
 	    
