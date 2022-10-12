@@ -43,9 +43,9 @@ node{
    }
  }//node closing
    
-  //Code Snippet for sending slack notifications.
+//Code Snippet for sending slack notifications.
 
-  def slackNotifications(String buildStatus = 'STARTED') {
+def slackNotifications(String buildStatus = 'STARTED') {
     // build status of null means successful
     buildStatus =  buildStatus ?: 'SUCCESS'
     //buildStatus = buildStatus ? "SUCCESS":"FAILURE"
