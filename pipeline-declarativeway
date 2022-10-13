@@ -1,0 +1,100 @@
+pipeline{
+
+agent any
+
+   tools {
+     maven 'maven3.8.6'
+    }
+    
+   triggers {
+    pollSCM '* * * * *'
+   }
+   
+   options {
+   buildDiscarder logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '5', daysToKeepStr: '', numToKeepStr: '5')
+   timestamps()
+   }
+
+
+post {
+  aborted {
+    // One or more steps need to be included within each condition's block.
+	slackNotifications(currentBuild.result)
+  }
+  success {
+    // One or more steps need to be included within each condition's block.
+	slackNotifications(currentBuild.result)
+  }
+  failure {
+    // One or more steps need to be included within each condition's block.
+	slackNotifications(currentBuild.result)
+  }
+ }
+ 
+  stages{
+  
+  //Get the Source Code
+  stage("CheckOutCode"){
+  steps{
+      slackNotifications('STARTED')
+  git branch: 'development', credentialsId: '7c5a7f50-b339-4bda-89f9-e208ba395c79', url: 'https://github.com/ADARSHA72/maven-web-application.git'
+  }
+  }
+  //Build
+  stage('Build'){
+  steps{
+  sh "mvn clean package"
+  }
+  }
+  //Execute SonarQube Report
+  stage('ExecuteSonarQubeReport'){
+  steps{
+  sh "mvn sonar:sonar"
+  }
+  }
+  //Upload Artifactory into Nexus server
+  stage('NexusServer'){
+  steps{
+  sh "mvn deploy"
+  }
+  }
+   //Deploy Application To TomcatServer
+  stage('DeployApplicationToTomcatServer'){
+  steps{
+  sshagent(['79ded39e-e9a6-4ef5-9722-8bd10fa227c0']){
+   sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@43.205.96.1:/opt/apache-tomcat-9.0.65/webapps/"
+   }
+   }
+   }
+  
+ }//stages closing
+ }//pipeline closing
+ 
+ //Code Snippet for sending slack notifications.
+
+def slackNotifications(String buildStatus = 'STARTED') {
+    // build status of null means successful
+    buildStatus =  buildStatus ?: 'SUCCESS'
+    //buildStatus = buildStatus ? "SUCCESS":"FAILURE"
+
+  // Default values
+  def colorName = 'RED'
+  def colorCode = '#FF0000'
+  def subject = "${buildStatus}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'"
+  def summary = "${subject} (${env.BUILD_URL})"
+
+  // Override default values based on build status
+  if (buildStatus == 'STARTED') {
+    colorName = 'YELLOW'
+    colorCode = '#FFFF00'
+  } else if (buildStatus == 'SUCCESS') {
+    colorName = 'GREEN'
+    colorCode = '#00FF00'
+  } else {
+    colorName = 'RED'
+    colorCode = '#FF0000'
+  }
+
+  // Send notifications
+  slackSend (color: colorCode, message: summary, channel: "#walmart-channel")
+}
