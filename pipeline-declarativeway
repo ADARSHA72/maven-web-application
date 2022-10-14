@@ -62,7 +62,7 @@ post {
   stage('DeployApplicationToTomcatServer'){
   steps{
   sshagent(['79ded39e-e9a6-4ef5-9722-8bd10fa227c0']){
-   sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.38.243:/opt/apache-tomcat-9.0.65/webapps/"
+   sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@172.31.34.251:/opt/apache-tomcat-9.0.65/webapps/"
    }
    }
    }
