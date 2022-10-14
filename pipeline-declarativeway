@@ -2,6 +2,7 @@ pipeline{
 
 agent{
  label'walmartnode'
+ }
 
    tools {
      maven 'maven3.8.6'
